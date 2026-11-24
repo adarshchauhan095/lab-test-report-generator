@@ -6,6 +6,7 @@ import { StatCard } from '@/components/common/StatCard';
 import { Badge } from '@/components/common/Badge';
 import { Button } from '@/components/common/Button';
 import { formatCurrency, formatDate } from '@/utils/formatters';
+import { FEATURE_FLAGS } from '@/config/features';
 import {
   FileText,
   Users2,
@@ -224,12 +225,14 @@ export function Dashboard() {
             <option value="prevMonth">Previous Month</option>
           </select>
 
-          <Link to="/reports/new">
-            <Button variant="primary" size="sm">
-              <Plus className="w-4 h-4" />
-              <span>Create Report</span>
-            </Button>
-          </Link>
+          {FEATURE_FLAGS.newReport && (
+            <Link to="/reports/new">
+              <Button variant="primary" size="sm">
+                <Plus className="w-4 h-4" />
+                <span>Create Report</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -249,20 +252,41 @@ export function Dashboard() {
           icon={FlaskConical}
           color="indigo"
         />
-        <StatCard
-          title="Period Revenue Billed"
-          value={formatCurrency(stats.totalBilled)}
-          subtitle={`Paid: ${formatCurrency(stats.totalPaid)}`}
-          icon={Receipt}
-          color="emerald"
-        />
-        <StatCard
-          title="Total Receivables Outstanding"
-          value={formatCurrency(stats.totalOutstanding)}
-          subtitle="Pending customer invoices"
-          icon={AlertCircle}
-          color="rose"
-        />
+        {FEATURE_FLAGS.billingAndInvoices ? (
+          <>
+            <StatCard
+              title="Period Revenue Billed"
+              value={formatCurrency(stats.totalBilled)}
+              subtitle={`Paid: ${formatCurrency(stats.totalPaid)}`}
+              icon={Receipt}
+              color="emerald"
+            />
+            <StatCard
+              title="Total Receivables Outstanding"
+              value={formatCurrency(stats.totalOutstanding)}
+              subtitle="Pending customer invoices"
+              icon={AlertCircle}
+              color="rose"
+            />
+          </>
+        ) : (
+          <>
+            <StatCard
+              title="Registered Clients"
+              value={stats.totalCustomers}
+              subtitle="Active testing parties"
+              icon={Users2}
+              color="emerald"
+            />
+            <StatCard
+              title="Reports Issued Today"
+              value={stats.reportsToday}
+              subtitle={`${stats.reportsThisMonth} this month`}
+              icon={Clock}
+              color="amber"
+            />
+          </>
+        )}
       </div>
 
       {/* Secondary Metrics Bar */}
@@ -275,49 +299,66 @@ export function Dashboard() {
           <span className="text-slate-500 block text-[11px]">Commodity Catalogs:</span>
           <span className="font-bold text-slate-900 text-base">{stats.totalCommodities}</span>
         </div>
-        <div>
-          <span className="text-slate-500 block text-[11px]">Invoices Issued:</span>
-          <span className="font-bold text-slate-900 text-base">{invoices.length}</span>
-        </div>
-        <div>
-          <span className="text-slate-500 block text-[11px]">Receipts Collected:</span>
-          <span className="font-bold text-slate-900 text-base">{payments.length}</span>
-        </div>
+        {FEATURE_FLAGS.billingAndInvoices ? (
+          <>
+            <div>
+              <span className="text-slate-500 block text-[11px]">Invoices Issued:</span>
+              <span className="font-bold text-slate-900 text-base">{invoices.length}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[11px]">Receipts Collected:</span>
+              <span className="font-bold text-slate-900 text-base">{payments.length}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <span className="text-slate-500 block text-[11px]">Total Tested Batches:</span>
+              <span className="font-bold text-slate-900 text-base">{stats.totalSamples}</span>
+            </div>
+            <div>
+              <span className="text-slate-500 block text-[11px]">Reports This Month:</span>
+              <span className="font-bold text-slate-900 text-base">{stats.reportsThisMonth}</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Monthly Revenue Trend */}
-        <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
-                Monthly Invoicing & Revenue Realization
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">Billed invoices vs received payments</p>
+      <div className={`grid grid-cols-1 ${FEATURE_FLAGS.billingAndInvoices ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6`}>
+        {/* Monthly Revenue Trend (Only if billing is enabled) */}
+        {FEATURE_FLAGS.billingAndInvoices && (
+          <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                  Monthly Invoicing & Revenue Realization
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Billed invoices vs received payments</p>
+              </div>
+              <TrendingUp className="w-4 h-4 text-sky-600" />
             </div>
-            <TrendingUp className="w-4 h-4 text-sky-600" />
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyRevenueData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 10 }} tickFormatter={(val) => `₹${val}`} />
+                  <Tooltip
+                    formatter={(val: any) => formatCurrency(Number(val) || 0)}
+                    contentStyle={{ fontSize: '11px', borderRadius: '8px' }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  <Bar dataKey="billed" name="Billed (₹)" fill="#0284c7" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="collected" name="Collected (₹)" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyRevenueData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 10 }} tickFormatter={(val) => `₹${val}`} />
-                <Tooltip
-                  formatter={(val: any) => formatCurrency(Number(val) || 0)}
-                  contentStyle={{ fontSize: '11px', borderRadius: '8px' }}
-                />
-                <Legend wrapperStyle={{ fontSize: '11px' }} />
-                <Bar dataKey="billed" name="Billed (₹)" fill="#0284c7" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="collected" name="Collected (₹)" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        )}
 
         {/* Commodity Distribution Pie */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col">
+        <div className={`bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col ${!FEATURE_FLAGS.billingAndInvoices && !FEATURE_FLAGS.userManagement ? 'lg:col-span-2' : ''}`}>
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
             Commodity Distribution
           </h3>
@@ -350,39 +391,37 @@ export function Dashboard() {
             )}
           </div>
         </div>
-      </div>
 
-      {/* Operator Report Production Chart */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-        <div className="flex items-center justify-between mb-4">
-          <div>
+        {/* Operator Report Production Chart (Only if user management is enabled or side by side with pie) */}
+        {FEATURE_FLAGS.userManagement && (
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
               Operator Testing Throughput
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">Reports issued by laboratory operators</p>
-          </div>
-        </div>
-        <div className="h-48">
-          {userChartData.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-xs text-slate-400">
-              No reports found for selected period
+            <p className="text-xs text-slate-500 mt-0.5 mb-2">Reports issued by laboratory operators</p>
+            <div className="flex-1 min-h-[220px]">
+              {userChartData.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-xs text-slate-400">
+                  No reports found for selected period
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={userChartData} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                    <XAxis type="number" tick={{ fontSize: 11 }} />
+                    <YAxis dataKey="user" type="category" tick={{ fontSize: 11 }} width={120} />
+                    <Tooltip contentStyle={{ fontSize: '11px', borderRadius: '8px' }} />
+                    <Bar dataKey="count" name="Reports Issued" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={userChartData} layout="vertical" margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
-                <XAxis type="number" tick={{ fontSize: 11 }} />
-                <YAxis dataKey="user" type="category" tick={{ fontSize: 11 }} width={120} />
-                <Tooltip contentStyle={{ fontSize: '11px', borderRadius: '8px' }} />
-                <Bar dataKey="count" name="Reports Issued" fill="#6366f1" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Recent Records Grid (Reports & Invoices) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className={`grid grid-cols-1 ${FEATURE_FLAGS.billingAndInvoices ? 'lg:grid-cols-2' : ''} gap-6`}>
         {/* Recent Reports */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -416,44 +455,46 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Invoices */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
-              Recent Invoices & Payments
-            </h3>
-            <Link to="/invoices" className="text-xs font-semibold text-sky-600 hover:underline">
-              View All Invoices →
-            </Link>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {recentInvoices.map((inv) => (
-              <div key={inv.id} className="py-2.5 flex items-center justify-between text-xs">
-                <div>
-                  <p className="font-mono font-bold text-slate-900">{inv.invoiceNumber}</p>
-                  <p className="text-slate-800 font-medium">{inv.customerName}</p>
-                  <p className="text-[10px] text-slate-400">Due: {formatDate(inv.dueDate)}</p>
+        {/* Recent Invoices (Only if billing is enabled) */}
+        {FEATURE_FLAGS.billingAndInvoices && (
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                Recent Invoices & Payments
+              </h3>
+              <Link to="/invoices" className="text-xs font-semibold text-sky-600 hover:underline">
+                View All Invoices →
+              </Link>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {recentInvoices.map((inv) => (
+                <div key={inv.id} className="py-2.5 flex items-center justify-between text-xs">
+                  <div>
+                    <p className="font-mono font-bold text-slate-900">{inv.invoiceNumber}</p>
+                    <p className="text-slate-800 font-medium">{inv.customerName}</p>
+                    <p className="text-[10px] text-slate-400">Due: {formatDate(inv.dueDate)}</p>
+                  </div>
+                  <div className="text-right">
+                    <Badge
+                      variant={
+                        inv.paymentStatus === 'paid'
+                          ? 'success'
+                          : inv.paymentStatus === 'partially_paid'
+                          ? 'warning'
+                          : 'danger'
+                      }
+                    >
+                      {inv.paymentStatus.replace('_', ' ')}
+                    </Badge>
+                    <p className="font-bold text-slate-900 mt-1">
+                      {formatCurrency(inv.grandTotal)}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <Badge
-                    variant={
-                      inv.paymentStatus === 'paid'
-                        ? 'success'
-                        : inv.paymentStatus === 'partially_paid'
-                        ? 'warning'
-                        : 'danger'
-                    }
-                  >
-                    {inv.paymentStatus.replace('_', ' ')}
-                  </Badge>
-                  <p className="font-bold text-slate-900 mt-1">
-                    {formatCurrency(inv.grandTotal)}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

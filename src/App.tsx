@@ -6,6 +6,8 @@ import { ToastProvider } from './context/ToastContext';
 import { MainLayout } from './layouts/MainLayout';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 
+import { FEATURE_FLAGS } from './config/features';
+
 // Pages / Feature Views
 import { Dashboard } from './features/dashboard/Dashboard';
 import { ReportForm } from './features/test-reports/ReportForm';
@@ -46,19 +48,19 @@ export default function App() {
         <HashRouter>
           <MainLayout>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/reports" element={<ReportHistory />} />
-              <Route path="/reports/new" element={<ReportForm />} />
-              <Route path="/reports/:id/edit" element={<ReportForm />} />
-              <Route path="/customers" element={<CustomerList />} />
-              <Route path="/commodities" element={<CommodityList />} />
-              <Route path="/test-parameters" element={<ParameterList />} />
-              <Route path="/invoices" element={<InvoiceList />} />
-              <Route path="/payments" element={<PaymentsList />} />
-              <Route path="/analytics" element={<AnalyticsView />} />
-              <Route path="/users" element={<UserList />} />
-              <Route path="/settings" element={<SettingsView />} />
-              <Route path="/backup" element={<BackupView />} />
+              {FEATURE_FLAGS.dashboard && <Route path="/" element={<Dashboard />} />}
+              {FEATURE_FLAGS.reportHistory && <Route path="/reports" element={<ReportHistory />} />}
+              {FEATURE_FLAGS.newReport && <Route path="/reports/new" element={<ReportForm />} />}
+              {FEATURE_FLAGS.newReport && <Route path="/reports/:id/edit" element={<ReportForm />} />}
+              {FEATURE_FLAGS.customers && <Route path="/customers" element={<CustomerList />} />}
+              {FEATURE_FLAGS.commodities && <Route path="/commodities" element={<CommodityList />} />}
+              {FEATURE_FLAGS.testParameters && <Route path="/test-parameters" element={<ParameterList />} />}
+              {FEATURE_FLAGS.billingAndInvoices && <Route path="/invoices" element={<InvoiceList />} />}
+              {FEATURE_FLAGS.payments && <Route path="/payments" element={<PaymentsList />} />}
+              {FEATURE_FLAGS.analytics && <Route path="/analytics" element={<AnalyticsView />} />}
+              {FEATURE_FLAGS.userManagement && <Route path="/users" element={<UserList />} />}
+              {FEATURE_FLAGS.settings && <Route path="/settings" element={<SettingsView />} />}
+              {FEATURE_FLAGS.backupRestore && <Route path="/backup" element={<BackupView />} />}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </MainLayout>

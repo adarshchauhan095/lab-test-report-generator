@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Menu, Plus, ShieldCheck, UserCheck, ChevronDown, Check } from 'lucide-react';
+import { Menu, Plus, ChevronDown, Check, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/common/Button';
+import { FEATURE_FLAGS } from '@/config/features';
 import type { UserRole } from '@/types';
 
 interface HeaderProps {
@@ -41,32 +42,48 @@ export function Header({ onToggleSidebar }: HeaderProps) {
 
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Quick Report Action */}
-        <Link to="/reports/new">
-          <Button size="sm" variant="primary" className="hidden sm:inline-flex">
-            <Plus className="w-4 h-4" />
-            <span>New Report</span>
-          </Button>
-        </Link>
+        {FEATURE_FLAGS.newReport && (
+          <Link to="/reports/new">
+            <Button size="sm" variant="primary" className="hidden sm:inline-flex">
+              <Plus className="w-4 h-4" />
+              <span>New Report</span>
+            </Button>
+          </Link>
+        )}
 
-        {/* Active Demo User Switcher */}
+        {/* Active Demo User Profile or Interactive Switcher */}
         <div className="relative">
-          <button
-            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-left transition-colors cursor-pointer"
-          >
-            <div className="w-7 h-7 rounded-full bg-sky-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
-              {currentUser.fullName.charAt(0)}
+          {FEATURE_FLAGS.userRoleSwitcher ? (
+            <button
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+              className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-left transition-colors cursor-pointer"
+            >
+              <div className="w-7 h-7 rounded-full bg-sky-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                {currentUser.fullName.charAt(0)}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-xs font-semibold text-slate-800 leading-none">{currentUser.fullName}</p>
+                <span className={`inline-block text-[10px] px-1.5 py-0.2 rounded font-medium mt-1 border ${roleLabels[currentUser.role].color}`}>
+                  {roleLabels[currentUser.role].label}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
+            </button>
+          ) : (
+            <div className="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-left">
+              <div className="w-7 h-7 rounded-full bg-sky-700 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                {currentUser.fullName.charAt(0)}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-xs font-semibold text-slate-800 leading-none">{currentUser.fullName}</p>
+                <span className={`inline-block text-[10px] px-1.5 py-0.2 rounded font-medium mt-1 border ${roleLabels[currentUser.role].color}`}>
+                  {roleLabels[currentUser.role].label}
+                </span>
+              </div>
             </div>
-            <div className="hidden md:block">
-              <p className="text-xs font-semibold text-slate-800 leading-none">{currentUser.fullName}</p>
-              <span className={`inline-block text-[10px] px-1.5 py-0.2 rounded font-medium mt-1 border ${roleLabels[currentUser.role].color}`}>
-                {roleLabels[currentUser.role].label}
-              </span>
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
-          </button>
+          )}
 
-          {isUserMenuOpen && (
+          {FEATURE_FLAGS.userRoleSwitcher && isUserMenuOpen && (
             <>
               <div
                 className="fixed inset-0 z-30"

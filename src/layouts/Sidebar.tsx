@@ -14,6 +14,7 @@ import {
   Database,
   FlaskConical,
 } from 'lucide-react';
+import { FEATURE_FLAGS } from '@/config/features';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -21,20 +22,22 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const navItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/reports/new', label: 'New Report', icon: FilePlus, highlight: true },
-    { to: '/reports', label: 'Report History', icon: FileText },
-    { to: '/customers', label: 'Customers', icon: Users2 },
-    { to: '/commodities', label: 'Commodities', icon: Package },
-    { to: '/test-parameters', label: 'Test Parameters', icon: SlidersHorizontal },
-    { to: '/invoices', label: 'Billing & Invoices', icon: Receipt },
-    { to: '/payments', label: 'Payments', icon: CreditCard },
-    { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-    { to: '/users', label: 'User Management', icon: UserCog },
-    { to: '/settings', label: 'Settings', icon: Settings },
-    { to: '/backup', label: 'Backup & Restore', icon: Database },
+  const allNavItems = [
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard, enabled: FEATURE_FLAGS.dashboard },
+    { to: '/reports/new', label: 'New Report', icon: FilePlus, highlight: true, enabled: FEATURE_FLAGS.newReport },
+    { to: '/reports', label: 'Report History', icon: FileText, enabled: FEATURE_FLAGS.reportHistory },
+    { to: '/customers', label: 'Customers', icon: Users2, enabled: FEATURE_FLAGS.customers },
+    { to: '/commodities', label: 'Commodities', icon: Package, enabled: FEATURE_FLAGS.commodities },
+    { to: '/test-parameters', label: 'Test Parameters', icon: SlidersHorizontal, enabled: FEATURE_FLAGS.testParameters },
+    { to: '/invoices', label: 'Billing & Invoices', icon: Receipt, enabled: FEATURE_FLAGS.billingAndInvoices },
+    { to: '/payments', label: 'Payments', icon: CreditCard, enabled: FEATURE_FLAGS.payments },
+    { to: '/analytics', label: 'Analytics', icon: BarChart3, enabled: FEATURE_FLAGS.analytics },
+    { to: '/users', label: 'User Management', icon: UserCog, enabled: FEATURE_FLAGS.userManagement },
+    { to: '/settings', label: 'Settings', icon: Settings, enabled: FEATURE_FLAGS.settings },
+    { to: '/backup', label: 'Backup & Restore', icon: Database, enabled: FEATURE_FLAGS.backupRestore },
   ];
+
+  const navItems = allNavItems.filter((item) => item.enabled);
 
   return (
     <>

@@ -7,6 +7,7 @@ import { db } from '@/database/db';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { Building2, Phone, Mail, MapPin, Receipt, FileText, CreditCard, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { FEATURE_FLAGS } from '@/config/features';
 
 interface CustomerDetailModalProps {
   isOpen: boolean;
@@ -105,23 +106,25 @@ export function CustomerDetailModal({ isOpen, onClose, customer }: CustomerDetai
           )}
         </div>
 
-        {/* Financial Highlights */}
-        <div className="grid grid-cols-3 gap-3 text-center">
-          <div className="p-3 bg-sky-50 border border-sky-100 rounded-lg">
-            <p className="text-[11px] font-medium text-sky-700 uppercase">Total Invoiced</p>
-            <p className="text-base font-bold text-sky-900 mt-0.5">{formatCurrency(totalBilled)}</p>
+        {/* Financial Highlights (Only if billing is enabled) */}
+        {FEATURE_FLAGS.billingAndInvoices && (
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="p-3 bg-sky-50 border border-sky-100 rounded-lg">
+              <p className="text-[11px] font-medium text-sky-700 uppercase">Total Invoiced</p>
+              <p className="text-base font-bold text-sky-900 mt-0.5">{formatCurrency(totalBilled)}</p>
+            </div>
+            <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
+              <p className="text-[11px] font-medium text-emerald-700 uppercase">Total Paid</p>
+              <p className="text-base font-bold text-emerald-900 mt-0.5">{formatCurrency(totalPaid)}</p>
+            </div>
+            <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg">
+              <p className="text-[11px] font-medium text-amber-700 uppercase">Outstanding Due</p>
+              <p className="text-base font-bold text-amber-900 mt-0.5">
+                {formatCurrency(Math.max(0, netOutstanding))}
+              </p>
+            </div>
           </div>
-          <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
-            <p className="text-[11px] font-medium text-emerald-700 uppercase">Total Paid</p>
-            <p className="text-base font-bold text-emerald-900 mt-0.5">{formatCurrency(totalPaid)}</p>
-          </div>
-          <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg">
-            <p className="text-[11px] font-medium text-amber-700 uppercase">Outstanding Due</p>
-            <p className="text-base font-bold text-amber-900 mt-0.5">
-              {formatCurrency(Math.max(0, netOutstanding))}
-            </p>
-          </div>
-        </div>
+        )}
 
         {/* Tabs */}
         <div>
@@ -137,28 +140,32 @@ export function CustomerDetailModal({ isOpen, onClose, customer }: CustomerDetai
               <FileText className="w-3.5 h-3.5" />
               <span>Reports ({reports.length})</span>
             </button>
-            <button
-              onClick={() => setActiveTab('invoices')}
-              className={`pb-2.5 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                activeTab === 'invoices'
-                  ? 'border-b-2 border-sky-600 text-sky-600 font-bold'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Receipt className="w-3.5 h-3.5" />
-              <span>Invoices ({invoices.length})</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('payments')}
-              className={`pb-2.5 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                activeTab === 'payments'
-                  ? 'border-b-2 border-sky-600 text-sky-600 font-bold'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <CreditCard className="w-3.5 h-3.5" />
-              <span>Payment Records ({payments.length})</span>
-            </button>
+            {FEATURE_FLAGS.billingAndInvoices && (
+              <>
+                <button
+                  onClick={() => setActiveTab('invoices')}
+                  className={`pb-2.5 flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    activeTab === 'invoices'
+                      ? 'border-b-2 border-sky-600 text-sky-600 font-bold'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <Receipt className="w-3.5 h-3.5" />
+                  <span>Invoices ({invoices.length})</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('payments')}
+                  className={`pb-2.5 flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    activeTab === 'payments'
+                      ? 'border-b-2 border-sky-600 text-sky-600 font-bold'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Payment Records ({payments.length})</span>
+                </button>
+              </>
+            )}
           </div>
 
           <div className="mt-3 max-h-64 overflow-y-auto">
