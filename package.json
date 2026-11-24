@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html');\"",
+    "build": "tsc && vite build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html');\" && mkdir -p docs assets && cp -R dist/* docs/ && cp -R dist/assets/* assets/",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
