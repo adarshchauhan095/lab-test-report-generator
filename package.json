@@ -4,8 +4,8 @@
   "description": "Lab Manager - Laboratory Management, Test Report Generation & Billing System",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html');\" && mkdir -p docs assets && cp -R dist/* docs/ && cp -R dist/assets/* assets/",
+    "dev": "cp index.template.html index.html && vite",
+    "build": "cp index.template.html index.html && tsc && vite build && cp dist/index.html ./index.html && cp dist/index.html ./404.html && cp dist/index.html dist/404.html && mkdir -p docs assets && rm -rf assets/* docs/* && cp -R dist/* docs/ && cp -R dist/assets/* assets/",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

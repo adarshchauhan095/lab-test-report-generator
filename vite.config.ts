@@ -10,6 +10,14 @@ export default defineConfig({
     tailwindcss(),
   ],
   base: './', // Essential for GitHub Pages deployment
+  preview: {
+    allowedHosts: true,
+    port: 4173,
+    host: '0.0.0.0',
+  },
+  server: {
+    allowedHosts: true,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
