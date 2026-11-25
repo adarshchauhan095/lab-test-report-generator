@@ -25,10 +25,10 @@ export function SunshineReportModal({ isOpen, onClose, report }: SunshineReportM
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs">
+      <div className="relative w-full max-w-4xl bg-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[94vh]">
         {/* Modal Toolbar */}
-        <div className="flex items-center justify-between px-6 py-3.5 bg-slate-900 text-white border-b border-slate-800">
+        <div className="shrink-0 flex items-center justify-between px-6 py-3.5 bg-slate-900 text-white border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <FileText className="w-5 h-5 text-sky-400" />
             <div>
@@ -60,12 +60,11 @@ export function SunshineReportModal({ isOpen, onClose, report }: SunshineReportM
           </div>
         </div>
 
-        {/* Report Content - High-Fidelity Paper Simulation */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100 flex justify-center">
+        {/* Report Content - High-Fidelity Paper Simulation inside a clean scroll view */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 bg-slate-200/70">
           <div
             ref={printRef}
-            className="w-full max-w-2xl bg-white p-6 sm:p-10 shadow-lg border border-slate-300 rounded-sm font-sans text-slate-800"
-            style={{ minHeight: '800px' }}
+            className="mx-auto w-full max-w-3xl bg-white p-6 sm:p-10 md:p-12 shadow-xl border border-slate-300 rounded-sm font-sans text-slate-800 space-y-6"
           >
             {/* Header with Logo & Lab Details */}
             <div className="flex items-center gap-4 pb-4 border-b-2 border-slate-800">
@@ -95,7 +94,7 @@ export function SunshineReportModal({ isOpen, onClose, report }: SunshineReportM
             </div>
 
             {/* Document Title */}
-            <div className="text-center my-4">
+            <div className="text-center my-3">
               <h2 className="text-base font-black uppercase tracking-wider text-slate-900 underline decoration-slate-400 underline-offset-4">
                 Test Report
               </h2>
