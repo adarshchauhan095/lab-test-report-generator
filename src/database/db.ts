@@ -13,6 +13,7 @@ import type {
   BillingSettings,
   ActivityLog,
 } from '@/types';
+import type { SunshineReport } from '@/types/sunshine';
 
 export class LabManagerDatabase extends Dexie {
   users!: Table<User, string>;
@@ -27,6 +28,7 @@ export class LabManagerDatabase extends Dexie {
   reportSettings!: Table<ReportSettings, string>;
   billingSettings!: Table<BillingSettings, string>;
   activityLogs!: Table<ActivityLog, string>;
+  simpleReports!: Table<SunshineReport, string>;
 
   constructor() {
     super('LabManagerDB');
@@ -44,6 +46,10 @@ export class LabManagerDatabase extends Dexie {
       reportSettings: 'id',
       billingSettings: 'id',
       activityLogs: 'id, userId, action, entityType, timestamp',
+    });
+
+    this.version(2).stores({
+      simpleReports: 'id, &reportNo, issuedTo, buyer, commodity, vehicleNo, reportIssueDate, createdAt',
     });
   }
 }
